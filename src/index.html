@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Focus XP</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="xp-desktop">
+
+    <!--
+    +==============================================+
+    |  MAIN WINDOW  (fills the whole screen)       |
+    +==============================================+
+    -->
+    <div class="xp-window main-window" id="mainWindow">
+
+        <!-- title bar -->
+        <div class="title-bar">
+            <div class="title-bar-left">
+                <span class="titlebar-icon">[o]</span>
+                <span class="title-text">Focus XP</span>
+            </div>
+            <div class="title-bar-buttons">
+                <button class="tb-btn tb-min" title="Minimize">_</button>
+                <button class="tb-btn tb-max" title="Maximize">[ ]</button>
+                <button class="tb-btn tb-close" title="Close">X</button>
+            </div>
+        </div>
+
+        <!--
+            MENU BAR
+            each item opens a dropdown panel
+        -->
+        <div class="menu-bar" id="menuBar">
+
+            <!-- FILE: main view (default) -->
+            <div class="menu-wrap">
+                <span class="menu-item active-menu-item" id="menuFile" onclick="switchView('file')">File</span>
+            </div>
+
+            <!-- EDIT: dropdown with task actions -->
+            <div class="menu-wrap" id="editWrap">
+                <span class="menu-item" id="menuEdit" onclick="toggleDropdown('editDrop', event)">Edit</span>
+                <div class="dropdown" id="editDrop">
+                    <div class="drop-section-label">-- Tasks --</div>
+                    <div class="drop-item" onclick="focusTaskInput(); closeDrop()">Add New Task</div>
+                    <div class="drop-item" onclick="clearDoneTasks(); closeDrop()">Remove Completed</div>
+                    <div class="drop-item" onclick="clearAllTasks(); closeDrop()">Clear All Tasks</div>
+                    <div class="drop-sep"></div>
+                    <div class="drop-section-label">-- Timer --</div>
+                    <div class="drop-item" onclick="resetTimer(); closeDrop()">Reset Timer</div>
+                </div>
+            </div>
+
+            <!-- TOOLS: custom timer duration -->
+            <div class="menu-wrap" id="toolsWrap">
+                <span class="menu-item" id="menuTools" onclick="switchView('tools')">Tools</span>
+            </div>
+
+            <!-- HELP: links / socials -->
+            <div class="menu-wrap" id="helpWrap">
+                <span class="menu-item" id="menuHelp" onclick="switchView('help')">Help</span>
+            </div>
+
+        </div><!-- /menu-bar -->
+
+
+        <!-- ============================================================
+             VIEW: FILE  (main screen w/ timer + tasks + stats)
+             ============================================================ -->
+        <div class="view-panel" id="viewFile">
+            <div class="window-body">
+
+                <!-- LEFT SIDEBAR -->
+                <div class="sidebar">
+
+                    <!-- task list -->
+                    <fieldset class="xp-group">
+                        <legend>[ Task List ]</legend>
+                        <div class="group-body">
+                            <div class="row-input">
+                                <input type="text" id="taskInput" class="xp-input" placeholder="New task...">
+                                <button id="addTaskBtn" class="xp-btn btn-default">Add</button>
+                            </div>
+                            <div class="list-box" id="taskListBox">
+                                <ul id="taskList"></ul>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- stats -->
+                    <fieldset class="xp-group side-group">
+                        <legend>[ Weekly Stats ]</legend>
+                        <div class="group-body">
+                            <!--
+                              ^
+                            5 |   _
+                            3 |  | |  _
+                            1 |__|_|_|_|__
+                              M T W T F S S
+                            -->
+                            <canvas id="studyChart"></canvas>
+                            <div class="sessions-row">
+                                <span class="sessions-label">Total sessions:</span>
+                                <span class="sessions-val" id="sessionCount">0</span>
+                            </div>
+                            <div class="sessions-row" style="margin-top:4px">
+                                <span class="sessions-label">Hours focused:</span>
+                                <span class="sessions-val" id="hoursCount">0.0</span>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- spotify -->
+                    <fieldset class="xp-group side-group">
+                        <legend>[ Now Playing ]</legend>
+                        <div class="group-body">
+                            <div id="spotifyArea">
+                                <pre class="ascii-music">  
+⠀⠀⠀⠀⣠⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣴⡇⠀⠀⠀⠘⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⣼⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⡼⣡⣇⠀⠀⠀⠀⣧⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⢠⣿⣿⠟⢻⣿⠤⠖⠒⠚⠉⠉⠉⠉⠉⠉⢩⡟⣹⠋⣿⠉⠉⠛⠒⣺⡤⢄⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⢸⣿⡟⠀⢠⣿⡇⠀⢀⡄⠀⠀⠀⠀⠀⠀⣏⣼⣃⣠⣽⡤⠤⢴⠯⣭⠧⢼⣎⡳⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠈⣿⡇⠀⣼⣿⡇⠀⠰⣇⣠⡤⠴⠒⠚⠉⣿⠁⣤⣾⣿⡇⢀⣈⣉⣥⡤⢼⠬⣯⣛⣆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡄⠀⠀⠀⠀⠀
+⠀⠀⠀⢻⣧⣼⣿⣿⠧⠒⠋⣏⣄⠀⠀⠀⠀⠀⢹⣀⡿⠿⠛⠉⠉⠁⠀⣀⣴⣾⠾⠓⠲⡯⣧⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣞⣇⠀⠀⠀⠀⠀
+⠀⠀⠀⣠⣿⣿⣿⡟⠀⠀⠀⣇⡿⠃⣀⡤⠴⠚⢹⡇⠀⠀⣀⡠⠖⠚⠉⢀⣀⠤⠖⠚⣹⣋⣏⡟⣦⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⢯⠏⢿⠀⠀⣄⠀⠀
+⠀⠀⣴⣿⣿⣿⡟⠀⠀⠀⢀⡫⠖⠋⠁⠀⠀⣠⣤⣧⠴⠋⠁⠀⣀⡤⠚⠉⠀⠀⠀⣰⠃⡽⠣⣏⡧⢧⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣀⠀⢸⣧⣴⣾⣀⠀⢸⡀⠀
+⢀⣾⣿⣿⡿⢻⣷⢀⡤⠞⠉⠀⠀⠀⠀⢀⣼⣿⡿⠏⠀⣀⡴⠛⠁⠀⠀⠀⠀⢀⡴⠁⡴⠁⡼⢸⣷⢸⠀⠀⠀⠀⠈⣧⠀⠀⠀⣀⡠⠔⠚⠉⠁⠀⠀⠀⠈⡇⠉⠁⠀⠉⣑⣧⢄
+⣼⣿⣿⠟⠀⣨⣿⣿⣿⣷⣦⡀⢀⣠⠖⠋⠀⠀⢀⣤⠞⠁⠀⠀⠀⠀⠀⣦⣠⠞⢶⡞⠣⣼⢁⡼⢁⡏⠀⠀⠀⠀⠀⢘⣧⠔⠋⠁⢀⡀⣀⡠⠴⠒⠚⢩⣽⡯⠉⠉⠉⠙⠷⠞⠤
+⣿⣿⡏⠀⣾⣿⣿⣿⡿⢿⣿⣿⣏⠁⠀⠀⢠⡴⠋⠀⠀⠀⠀⠀⠀⠀⠀⢰⠛⢦⠎⢉⠿⣌⡞⢀⡞⠀⠀⠀⢀⡤⠚⠉⠘⣇⣀⠤⠚⣯⠁⠀⠀⣀⣤⠼⠟⠓⠒⠒⠒⠒⢓⠒⠒
+⣿⣿⡇⠰⣿⣿⠁⢻⣧⠀⠹⣿⣿⠀⣠⠞⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡇⢠⢯⣷⡏⢰⢿⢇⠞⠀⣀⠴⠚⠁⠀⢀⣠⡶⢻⡇⠀⢀⡸⡶⠚⠉⠀⢸⡓⣦⣠⠤⠤⠒⠒⢺⡂⢉
+⠘⣿⣇⠀⢻⣿⣄⠈⣿⡆⠀⣿⣿⠞⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠱⣮⣸⣋⣰⣋⣤⠾⠒⠉⠀⣠⣆⡠⠖⠋⠹⠤⣞⠴⠚⠁⠀⢻⣀⡤⠖⠊⡏⢸⠇⠀⣀⠤⠔⠺⠟⠈
+⠀⠘⢿⣷⣄⡈⠛⠛⢸⣿⣾⡿⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⢾⣠⠇⢠⠋⠀⣀⣠⣾⡟⡏⠀⠀⣀⠴⠊⠁⠀⢀⡠⣶⣿⡇⠀⢀⣴⣾⠼⠚⠉⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠈⠙⠛⠿⠿⠟⢻⣯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⢾⢉⠏⠉⠉⠁⣻⢋⣤⡧⠴⠋⢷⡀⢀⡤⠚⠉⠀⠿⠿⣃⠴⠚⠛⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⢀⣀⡀⠀⠈⣿⣇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⣽⠒⠠⠤⠔⣿⠛⠛⠁⠀⣀⡬⢿⠁⠀⠀⠀⣀⡴⠚⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⣰⣿⣿⣿⣆⠀⢸⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢹⠦⣀⣀⣤⣿⣀⡠⠴⠊⠁⠀⢈⣧⣀⠴⠚⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⢻⣿⣿⣿⠟⢀⣼⡿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢧⡀⠈⠉⠁⠀⠀⠀⠀⢀⣠⡿⣻⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠈⠛⠿⠿⠿⠿⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠒⠲⠦⠶⠒⠚⠉⠁⠀⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+ [ no music loaded ]</pre>
+                                <div class="row-input" style="margin-top:5px">
+                                    <input type="text" id="spotifyUrl" class="xp-input" placeholder="spotify link...">
+                                    <button class="xp-btn btn-default" onclick="loadSpotify()">Load</button>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                </div><!-- /sidebar -->
+
+                <div class="vert-divider"></div>
+
+                <!-- RIGHT: TIMER AREA -->
+                <div class="timer-area">
+
+                    <!-- quick mode tabs -->
+                    <div class="tab-row">
+                        <button class="tab active" id="tabFocus"      onclick="setMode(null,'FOCUS',this)">Focus</button>
+                        <button class="tab"        id="tabShort"      onclick="setMode(5,'SHORT BREAK',this)">Short Break (5m)</button>
+                        <button class="tab"        id="tabLong"       onclick="setMode(15,'LONG BREAK',this)">Long Break (15m)</button>
+                        <span class="tab-dur-hint" id="tabDurHint">25m</span>
+                    </div>
+
+                    <!-- timer card -->
+                    <div class="timer-win">
+                        <div class="timer-win-bar">
+                            <span id="timerModeLabel">-- FOCUS SESSION --</span>
+                            <span class="timer-win-bar-right" id="sessionBadge">session #1</span>
+                        </div>
+
+                        <div class="timer-win-body">
+
+                            <!--
+                                  ___________
+                                /             \
+                               |    25:00      |
+                               |   [ timer ]   |
+                                \___________/
+                            -->
+                            <div class="clock-wrap">
+                                <svg class="clock-svg" viewBox="0 0 220 220">
+                                    <defs>
+                                        <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%"   stop-color="#316ac5"/>
+                                            <stop offset="100%" stop-color="#5ab532"/>
+                                        </linearGradient>
+                                    </defs>
+                                    <!-- outer track -->
+                                    <circle class="svg-track" cx="110" cy="110" r="95"/>
+                                    <!-- progress ring -->
+                                    <circle class="svg-prog" cx="110" cy="110" r="95"
+                                        id="svgProg"
+                                        stroke-dasharray="597"
+                                        stroke-dashoffset="0"
+                                        transform="rotate(-90 110 110)"/>
+                                    <!-- inner bevel rings for depth -->
+                                    <circle cx="110" cy="110" r="78" fill="none" stroke="#c4c0b8" stroke-width="1.5"/>
+                                    <circle cx="110" cy="110" r="79" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="1"/>
+                                    <!-- tick marks at 12,3,6,9 -->
+                                    <line x1="110" y1="17"  x2="110" y2="30"  stroke="#aca899" stroke-width="2"/>
+                                    <line x1="203" y1="110" x2="190" y2="110" stroke="#aca899" stroke-width="2"/>
+                                    <line x1="110" y1="203" x2="110" y2="190" stroke="#aca899" stroke-width="2"/>
+                                    <line x1="17"  y1="110" x2="30"  y2="110" stroke="#aca899" stroke-width="2"/>
+                                </svg>
+                                <div class="clock-face">
+                                    <div class="clock-label" id="timerClockLabel">[ focus ]</div>
+                                    <div id="timer" class="clock-digits">25:00</div>
+                                    <div class="clock-sublabel" id="clockSublabel">stay locked in</div>
+                                </div>
+                            </div>
+
+                            <!-- xp progress bar -->
+                            <div class="prog-wrap">
+                                <div class="prog-track">
+                                    <div class="prog-fill" id="progFill"></div>
+                                </div>
+                                <div class="prog-pct" id="progPct">0%</div>
+                            </div>
+
+                            <!-- controls -->
+                            <div class="ctrl-row">
+                                <button id="startBtn" class="xp-btn btn-green">[ > ] Start</button>
+                                <button id="pauseBtn" class="xp-btn btn-default">[ || ] Pause</button>
+                                <button id="resetBtn" class="xp-btn btn-default">[ &lt;&lt; ] Reset</button>
+                            </div>
+
+                            <div class="hint-row">
+                                <kbd>SPACE</kbd> start/pause &nbsp; <kbd>R</kbd> reset &nbsp; <kbd>ESC</kbd> close dialog
+                            </div>
+
+                            <pre class="ascii-deco" id="asciiDeco">
++------[ FOCUS MODE ]----------+
+|          Lock in.            |
++------------------------------+</pre>
+
+                        </div>
+                    </div><!-- /timer-win -->
+
+                </div><!-- /timer-area -->
+
+            </div><!-- /window-body -->
+        </div><!-- /viewFile -->
+
+
+        <!-- ============================================================
+             VIEW: TOOLS  (custom timer settings)
+             ============================================================ -->
+        <div class="view-panel hidden" id="viewTools">
+            <div class="inner-view-wrap">
+
+                <div class="inner-view-title">
+                    <pre class="ascii-section-art">          
+,--------.             ,--.        
+'--.  .--',---.  ,---. |  | ,---.  
+   |  |  | .-. || .-. ||  |(  .-'  
+   |  |  ' '-' '' '-' '|  |.-'  `) 
+   `--'   `---'  `---' `--'`----'  
+                                   </pre>
+                    <p class="inner-view-sub">Customize your timer durations. Changes save automatically.</p>
+                </div>
+
+                <div class="tools-grid">
+
+                    <fieldset class="xp-group tools-group">
+                        <legend>[ Focus Duration ]</legend>
+                        <div class="group-body tools-body">
+                            <p class="tools-desc">How long each focus session runs.</p>
+                            <div class="tools-input-row">
+                                <input type="number" id="toolFocusMins" class="xp-input tools-num" min="1" max="120" value="25">
+                                <span class="tools-unit">minutes</span>
+                            </div>
+                            <div class="preset-row">
+                                <span class="preset-label">Presets:</span>
+                                <button class="xp-btn btn-default preset-btn" onclick="setPreset('toolFocusMins',20)">20m</button>
+                                <button class="xp-btn btn-default preset-btn" onclick="setPreset('toolFocusMins',25)">25m</button>
+                                <button class="xp-btn btn-default preset-btn" onclick="setPreset('toolFocusMins',45)">45m</button>
+                                <button class="xp-btn btn-default preset-btn" onclick="setPreset('toolFocusMins',60)">60m</button>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="xp-group tools-group">
+                        <legend>[ Short Break Duration ]</legend>
+                        <div class="group-body tools-body">
+                            <p class="tools-desc">How long your short break runs.</p>
+                            <div class="tools-input-row">
+                                <input type="number" id="toolShortMins" class="xp-input tools-num" min="1" max="30" value="5">
+                                <span class="tools-unit">minutes</span>
+                            </div>
+                            <div class="preset-row">
+                                <span class="preset-label">Presets:</span>
+                                <button class="xp-btn btn-default preset-btn" onclick="setPreset('toolShortMins',3)">3m</button>
+                                <button class="xp-btn btn-default preset-btn" onclick="setPreset('toolShortMins',5)">5m</button>
+                                <button class="xp-btn btn-default preset-btn" onclick="setPreset('toolShortMins',10)">10m</button>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="xp-group tools-group">
+                        <legend>[ Long Break Duration ]</legend>
+                        <div class="group-body tools-body">
+                            <p class="tools-desc">How long your long break runs.</p>
+                            <div class="tools-input-row">
+                                <input type="number" id="toolLongMins" class="xp-input tools-num" min="1" max="60" value="15">
+                                <span class="tools-unit">minutes</span>
+                            </div>
+                            <div class="preset-row">
+                                <span class="preset-label">Presets:</span>
+                                <button class="xp-btn btn-default preset-btn" onclick="setPreset('toolLongMins',10)">10m</button>
+                                <button class="xp-btn btn-default preset-btn" onclick="setPreset('toolLongMins',15)">15m</button>
+                                <button class="xp-btn btn-default preset-btn" onclick="setPreset('toolLongMins',20)">20m</button>
+                                <button class="xp-btn btn-default preset-btn" onclick="setPreset('toolLongMins',30)">30m</button>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="xp-group tools-group tools-group-full">
+                        <legend>[ Apply Settings ]</legend>
+                        <div class="group-body tools-body">
+                            <p class="tools-desc">Save your custom durations and return to the timer.</p>
+                            <div class="tools-actions">
+                                <button class="xp-btn btn-green" onclick="applyToolSettings()">[ > ] Save &amp; Apply</button>
+                                <button class="xp-btn btn-default" onclick="resetToolDefaults()">Reset to Defaults</button>
+                                <button class="xp-btn btn-default" onclick="switchView('file')">Back to Timer</button>
+                            </div>
+                            <div class="tools-status" id="toolsStatus"></div>
+                        </div>
+                    </fieldset>
+
+                </div>
+
+            </div>
+        </div><!-- /viewTools -->
+
+
+        <!-- ============================================================
+             VIEW: HELP
+             ============================================================ -->
+        <div class="view-panel hidden" id="viewHelp">
+            <div class="inner-view-wrap">
+
+                <div class="inner-view-title">
+                    <pre class="ascii-section-art">                           
+,--.  ,--.       ,--.        
+|  '--'  | ,---. |  | ,---.  
+|  .--.  || .-. :|  || .-. | 
+|  |  |  |\   --.|  || '-' ' 
+`--'  `--' `----'`--'|  |-'  
+                     `--'    </pre>
+                </div>
+
+                <div class="help-grid">
+
+                    <fieldset class="xp-group help-group">
+                        <legend>[ Webspace ]</legend>
+                        <div class="group-body">
+                            <p class="help-note">-- :D --</p>
+                            <ul class="link-list">
+                                <li><a href="https://github.com/4nily" class="xp-link" target="_blank">[github]  @4nily</a></li>
+                                <li><a href="http://janenaniela.com/" class="xp-link" target="_blank">[website] janenaniela.com</a></li>
+                                <li><a href="https://www.youtube.com/@JanenAniela" class="xp-link" target="_blank">[youtube]  @JanenAniela</a></li>
+                                <li><a href="https://www.instagram.com/janenaniela/" class="xp-link" target="_blank">[instagram]   @janenaniela</a></li>
+                            </ul>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="xp-group help-group">
+                        <legend>[ Other ]</legend>
+                        <div class="group-body">
+                            <p class="help-note">-- motivation --</p>
+                            <ul class="link-list">
+                                <li><a href="https://www.youtube.com/watch?v=WNksGFGGrB0" class="xp-link" target="_blank">[video] why you procrastinate</a></li>
+                                <li><a href="https://jamesclear.com/atomic-habits" class="xp-link" target="_blank">[book]  atomic habits</a></li>
+                                <li><a href="https://www.youtube.com/watch?v=ZXsQAXx_ao0" class="xp-link" target="_blank">[video] do the work</a></li>
+                                <li><a href="#" class="xp-link" target="_blank">[link]  add your own</a></li>
+                            </ul>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="xp-group help-group help-group-full">
+                        <legend>[ About This App ]</legend>
+                        <div class="group-body">
+                            <pre class="ascii-about">
+ ________     ,-----.        _______     ___    _    .-'''-.          _____     __  .-------.  
+|        |  .'  .-,  '.     /   __  \  .'   |  | |  / _     \         \   _\   /  / \  _(`)_ \ 
+|   .----' / ,-.|  \ _ \   | ,_/  \__) |   .'  | | (`' )/`--'         .-./ ). /  '  | (_ o._)| 
+|  _|____ ;  \  '_ /  | :,-./  )       .'  '_  | |(_ o _).            \ '_ .') .'   |  (_,_) / 
+|_( )_   ||  _`,/ \ _/  |\  '_ '`)     '   ( \.-.| (_,_). '.         (_ (_) _) '    |   '-.-'  
+(_ o._)__|: (  '\_/ \   ; > (_)  )  __ ' (`. _` /|.---.  \  :          /    \   \   |   |      
+|(_,_)     \ `"/  \  ) / (  .  .-'_/  )| (_ (_) _)\    `-'  |          `-'`-'    \  |   |      
+|   |       '. \_/``".'   `-'`-'     /  \ /  . \ / \       /          /  /   \    \ /   )      
+'---'         '-----'       `._____.'    ``-'`-''   `-...-'          '--'     '----'`---'      
+ Focus XP - a pomodoro timer that looks like Windows XP
+ Built to help you get stuff done without distractions.
+
+ How Focus XP works:
+    - Set a task in the sidebar
+    - Start and work until the timer ends
+    - Take a break
+    - Repeat
+    - Check your weekly stats to see how youre doing
+
+ Keyboard shortcuts:
+   SPACE  .....  start / pause
+   R      .....  reset timer
+   ESC    .....  close popup
+
+ Your data (tasks, sessions, weekly stats) is saved locally in your browser; no account needed.
+
+ Thank you for checking out Focus XP!
+                            </pre>
+                        </div>
+                    </fieldset>
+
+                </div>
+
+                <div class="help-back-row">
+                    <button class="xp-btn btn-default" onclick="switchView('file')">[ &lt; ] Back to Timer</button>
+                </div>
+
+            </div>
+        </div><!-- /viewHelp -->
+
+    </div><!-- /main-window -->
+
+</div><!-- /xp-desktop -->
+
+
+<!--
++==========================================+
+|  TASKBAR                                 |
++==========================================+
+-->
+<div class="taskbar">
+    <div class="start-btn" id="startMenuBtn">
+        <span class="start-orb-txt">(+)</span>
+        <span>start</span>
+    </div>
+    <div class="taskbar-sep"></div>
+    <div class="taskbar-windows">
+        <div class="taskbar-item active">[::] Focus XP</div>
+    </div>
+    <div class="taskbar-tray">
+        <span class="tray-icon">[net]</span>
+        <span class="tray-icon">[vol]</span>
+        <span id="tray-time">12:00</span>
+    </div>
+</div>
+
+
+<!--
++==========================================+
+|  SESSION COMPLETE DIALOG                 |
++==========================================+
+-->
+<div class="dialog-overlay" id="dialogOverlay">
+    <div class="xp-dialog">
+
+        <div class="title-bar">
+            <div class="title-bar-left">
+                <span class="titlebar-icon">[!]</span>
+                <span>Focus XP</span>
+            </div>
+            <div class="title-bar-buttons">
+                <button class="tb-btn tb-close" onclick="closeDialog()">X</button>
+            </div>
+        </div>
+
+        <div class="dialog-body">
+            <div class="dialog-icon">
+                <pre class="dialog-ascii">
+  _____
+ /     \
+| (^_^) |
+ \_____/
+ you did it</pre>
+            </div>
+            <div class="dialog-text">
+                <strong>Session Complete!</strong>
+                <p id="dialogMsg">You did great! Take a break!</p>
+                <p class="dialog-sub" id="dialogSub"></p>
+            </div>
+        </div>
+
+        <div class="dialog-footer">
+            <button class="xp-btn btn-default dialog-ok" onclick="closeDialog()">OK</button>
+            <button class="xp-btn btn-default" onclick="closeDialog()">Cancel</button>
+        </div>
+
+    </div>
+</div>
+
+
+<!--
++==========================================+
+|  TOOLS: CUSTOM TIMER DIALOG              |
+|  (quick access from File view)           |
++==========================================+
+-->
+
+<script src="script.js"></script>
+</body>
+</html>

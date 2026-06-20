@@ -1,0 +1,1235 @@
+/*
+    focus xp - style.css
+
+    colors:
+      luna blue title  : #0a246a -> #a6caf0
+      window bg        : #ece9d8
+      silver/button    : #d4d0c8 / #f0ede4 / #aca899
+      bliss sky top    : #a6d4f5
+      bliss sky mid    : #2060b0
+      bliss green      : #5ab532
+      xp blue accent   : #316ac5
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Tahoma:wght@400;700&display=swap');
+
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    height: 100%;
+}
+
+body {
+    height: 100%;
+    overflow: hidden;
+    font-family: Tahoma, 'MS Sans Serif', Arial, sans-serif;
+    font-size: 11px;
+    background: #0a246a;
+}
+
+
+/* ============================================
+   DESKTOP BACKGROUND
+   the classic bliss look -- sky + green hill
+   ============================================ */
+
+.xp-desktop {
+    position: fixed;
+    inset: 0;
+    bottom: 30px;   /* leave room for taskbar */
+    background: linear-gradient(
+        to bottom,
+        #a6d4f5  0%,
+        #60aae0 30%,
+        #2060b0 58%,
+        #1a4ea0 62%,
+        #4aaa22 62%,
+        #5ab532 68%,
+        #3a8818 100%
+    );
+    overflow: hidden;
+}
+
+/* bliss clouds / glow -- subtle */
+.xp-desktop::before {
+    content: '';
+    position: absolute;
+    top: 5%;
+    left: 10%;
+    width: 40%;
+    height: 20%;
+    background: radial-gradient(ellipse, rgba(255,255,255,.18) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.xp-desktop::after {
+    content: '';
+    position: absolute;
+    bottom: 20%;
+    right: 5%;
+    width: 35%;
+    height: 18%;
+    background: radial-gradient(ellipse, rgba(255,255,255,.1) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+
+/* ============================================
+   TASKBAR
+   ============================================ */
+
+.taskbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30px;
+    background: linear-gradient(
+        to bottom,
+        #245adc 0%,
+        #1c4cb8 3px,
+        #1848b4 5px,
+        #2254c0 100%
+    );
+    border-top: 1px solid #0a1870;
+    box-shadow: 0 -1px 0 #4878e0;
+    display: flex;
+    align-items: center;
+    z-index: 9999;
+}
+
+.start-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    height: 26px;
+    margin: 2px 0 2px 2px;
+    padding: 0 12px 0 8px;
+    background: linear-gradient(to bottom, #62b340 0%, #3e8a1c 45%, #2d7010 100%);
+    border: 1px solid #1a5008;
+    border-radius: 0 12px 12px 0;
+    color: white;
+    font-weight: bold;
+    font-size: 12px;
+    font-family: Tahoma, Arial, sans-serif;
+    letter-spacing: .5px;
+    cursor: pointer;
+    text-shadow: 0 1px 1px rgba(0,0,0,.5);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 1px 1px 3px rgba(0,0,0,.4);
+    user-select: none;
+}
+
+.start-btn:hover {
+    background: linear-gradient(to bottom, #72c450 0%, #4e9a2c 45%, #3d8020 100%);
+}
+
+.start-orb-txt {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: #c8f0a0;
+}
+
+.taskbar-sep {
+    width: 2px;
+    height: 22px;
+    margin: 0 4px;
+    background: linear-gradient(to right, #0a2060, #4070d0);
+    border-right: 1px solid #6090e8;
+}
+
+.taskbar-windows {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    padding: 0 4px;
+    overflow: hidden;
+}
+
+.taskbar-item {
+    height: 22px;
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    font-size: 11px;
+    color: white;
+    background: linear-gradient(to bottom, #2a5ccc 0%, #1a4ab8 100%);
+    border: 1px solid #6080d0;
+    border-radius: 2px;
+    cursor: pointer;
+    text-shadow: 0 1px 1px rgba(0,0,0,.5);
+    white-space: nowrap;
+}
+
+.taskbar-item.active {
+    background: linear-gradient(to bottom, #102060 0%, #1a3a90 100%);
+    box-shadow: inset 1px 1px 2px rgba(0,0,0,.5);
+    border-color: #3050a0;
+}
+
+.taskbar-tray {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 10px;
+    height: 100%;
+    color: white;
+    font-size: 11px;
+    background: linear-gradient(to bottom, #1a4ab8, #1848b4);
+    border-left: 1px solid #0a2060;
+    box-shadow: inset 1px 0 0 #4060c0;
+    text-shadow: 0 1px 1px rgba(0,0,0,.5);
+}
+
+.tray-icon {
+    font-family: 'Courier New', monospace;
+    font-size: 9px;
+    color: #a0c0f0;
+}
+
+
+/* ============================================
+   MAIN WINDOW (fills the desktop area)
+   ============================================ */
+
+.xp-window {
+    position: absolute;
+    background: #ece9d8;
+    border: 1px solid #003280;
+    border-radius: 8px 8px 3px 3px;
+    box-shadow:
+        0 0 0 1px #6090d8,
+        3px 5px 24px rgba(0,0,0,.55);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.main-window {
+    /* centered window -- enough margin to see the bliss wallpaper */
+    top: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(94vw, 1020px);
+    /* height: fill most of the screen but leave the desktop visible */
+    bottom: 46px;   /* 30px taskbar + 16px gap */
+}
+
+
+/* title bar */
+.title-bar {
+    flex-shrink: 0;
+    background: linear-gradient(
+        to bottom,
+        #90b8f0  0%,
+        #3878e0  4%,
+        #2264cc  8%,
+        #1e58c0 55%,
+        #1850b8 90%,
+        #1040a0 100%
+    );
+    padding: 4px 5px 4px 7px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 28px;
+    user-select: none;
+}
+
+.title-bar-left {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0,0,0,.6);
+}
+
+.titlebar-icon {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: #c8e0ff;
+}
+
+.title-text { letter-spacing: .3px; }
+
+.title-bar-buttons {
+    display: flex;
+    gap: 2px;
+}
+
+.tb-btn {
+    width: 21px;
+    height: 21px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: bold;
+    font-family: Tahoma, Arial, sans-serif;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    color: white;
+    border: 1px solid rgba(0,0,0,.4);
+    text-shadow: 0 1px 1px rgba(0,0,0,.5);
+}
+
+.tb-min, .tb-max {
+    background: linear-gradient(to bottom, #7ab0e8, #4880cc 45%, #3068b8);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.4);
+}
+.tb-close {
+    background: linear-gradient(to bottom, #f07070, #d83030 45%, #b81818);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.3);
+}
+.tb-btn:hover { filter: brightness(1.2); }
+.tb-btn:active { filter: brightness(.85); }
+
+
+/* ============================================
+   MENU BAR
+   ============================================ */
+
+.menu-bar {
+    flex-shrink: 0;
+    background: #ece9d8;
+    padding: 1px 4px;
+    border-bottom: 1px solid #aca899;
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 200;
+}
+
+.menu-wrap {
+    position: relative;
+}
+
+.menu-item {
+    display: inline-block;
+    padding: 3px 8px;
+    font-size: 11px;
+    cursor: pointer;
+    color: #000;
+    border-radius: 0;
+    user-select: none;
+}
+.menu-item:hover,
+.menu-item.open {
+    background: #316ac5;
+    color: white;
+}
+
+.active-menu-item {
+    /* no underline or anything, just visually same */
+}
+
+/* dropdown */
+.dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 180px;
+    background: #ece9d8;
+    border: 1px solid #7f7b72;
+    box-shadow: 2px 3px 8px rgba(0,0,0,.35);
+    z-index: 500;
+    padding: 2px 0;
+}
+
+.dropdown.open { display: block; }
+
+.drop-item {
+    padding: 5px 20px 5px 14px;
+    font-size: 11px;
+    color: #000;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.drop-item:hover {
+    background: #316ac5;
+    color: white;
+}
+
+.drop-section-label {
+    padding: 4px 14px 2px;
+    font-size: 10px;
+    color: #777;
+    font-family: 'Courier New', monospace;
+    cursor: default;
+}
+
+.drop-sep {
+    height: 1px;
+    background: #aca899;
+    margin: 3px 6px;
+}
+
+
+/* ============================================
+   VIEW PANELS
+   ============================================ */
+
+.view-panel {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.view-panel.hidden {
+    display: none;
+}
+
+
+/* ============================================
+   FILE VIEW: window-body layout
+   ============================================ */
+
+.window-body {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+}
+
+.sidebar {
+    width: clamp(260px, 30vw, 360px);
+    flex-shrink: 0;
+    padding: 8px;
+    overflow-y: auto;
+    background: #ece9d8;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.vert-divider {
+    width: 3px;
+    flex-shrink: 0;
+    background: linear-gradient(to right, #9a9690, #e8e5de, #b0aca4);
+}
+
+.timer-area {
+    flex: 1;
+    padding: clamp(8px, 2vw, 18px) clamp(10px, 2.5vw, 24px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: auto;
+}
+
+
+/* ============================================
+   FIELDSET GROUP BOXES
+   ============================================ */
+
+.xp-group {
+    border: 2px solid;
+    border-color: #a8a4a0 #f8f8f4 #f8f8f4 #a8a4a0;
+    background: #ece9d8;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+.side-group {
+    flex-shrink: 0;
+}
+
+.xp-group legend {
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    color: #444;
+    padding: 0 4px;
+    margin-left: 6px;
+    background: #ece9d8;
+}
+
+.group-body {
+    padding: 7px;
+}
+
+
+/* ============================================
+   XP INPUTS & BUTTONS
+   ============================================ */
+
+.xp-input {
+    font-family: Tahoma, Arial, sans-serif;
+    font-size: 11px;
+    background: white;
+    color: #000;
+    padding: 3px 5px;
+    outline: none;
+    width: 100%;
+    border: 2px solid;
+    border-color: #7f7b72 #dedad2 #dedad2 #7f7b72;
+}
+.xp-input:focus {
+    border-color: #0a246a #dedad2 #dedad2 #0a246a;
+}
+
+.xp-btn {
+    font-family: Tahoma, Arial, sans-serif;
+    font-size: 11px;
+    color: #000;
+    cursor: pointer;
+    padding: 4px 12px;
+    border-radius: 3px;
+    min-width: 48px;
+    white-space: nowrap;
+    user-select: none;
+    border: 1px solid;
+    border-color: #fff #7f7b72 #7f7b72 #fff;
+    background: linear-gradient(to bottom, #f4f1ea 0%, #dedad2 100%);
+    box-shadow: inset -1px -1px 0 #a8a4a0, inset 1px 1px 0 #fff;
+    outline: 1px solid #a8a4a0;
+    outline-offset: -2px;
+}
+.xp-btn:hover {
+    background: linear-gradient(to bottom, #dce8f8 0%, #b8cced 100%);
+    border-color: #0a246a #7f7b72 #7f7b72 #0a246a;
+}
+.xp-btn:active {
+    background: linear-gradient(to bottom, #c0d0e8, #a8bce0);
+    border-color: #7f7b72 #fff #fff #7f7b72;
+    transform: translate(1px,1px);
+    box-shadow: inset 1px 1px 0 #a8a4a0, inset -1px -1px 0 #fff;
+}
+
+.btn-green {
+    background: linear-gradient(to bottom, #96cc54 0%, #6aaa28 50%, #589018 100%);
+    border-color: #fff #3a6808 #3a6808 #fff;
+    color: white;
+    font-weight: bold;
+    text-shadow: 0 1px 1px rgba(0,0,0,.4);
+    box-shadow: inset -1px -1px 0 #2a5008, inset 1px 1px 0 #b8e870;
+    outline-color: #3a6808;
+}
+.btn-green:hover {
+    background: linear-gradient(to bottom, #a8da64, #7aba38 50%, #68a028 100%);
+}
+.btn-green:active {
+    background: linear-gradient(to bottom, #6aaa28, #96cc54);
+}
+
+
+/* ============================================
+   TASK LIST
+   ============================================ */
+
+.row-input {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 5px;
+}
+.row-input .xp-input { flex: 1; min-width: 0; }
+
+.list-box {
+    border: 2px solid;
+    border-color: #7f7b72 #dedad2 #dedad2 #7f7b72;
+    background: white;
+    max-height: clamp(100px, 18vh, 200px);
+    overflow-y: auto;
+}
+
+#taskList { list-style: none; }
+
+.task {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 3px 5px;
+    border-bottom: 1px solid #f0ede4;
+    min-height: 22px;
+}
+.task:last-child { border-bottom: none; }
+.task:hover { background: #316ac5; color: white; }
+.task:hover .del-btn { color: white; }
+
+.task-left {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex: 1;
+    overflow: hidden;
+}
+.task-left span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.done { text-decoration: line-through; color: #888; }
+
+.del-btn {
+    background: none;
+    border: none;
+    font-size: 12px;
+    cursor: pointer;
+    color: #aaa;
+    padding: 0 3px;
+    flex-shrink: 0;
+}
+
+
+/* stats */
+.sessions-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 5px;
+    padding: 0 2px;
+}
+.sessions-label { color: #555; }
+.sessions-val {
+    font-family: 'Courier New', monospace;
+    font-size: 18px;
+    font-weight: bold;
+    color: #316ac5;
+}
+
+/* spotify */
+.ascii-music {
+    font-family: 'Courier New', monospace;
+    font-size: 9px;
+    color: #777;
+    line-height: 1.3;
+    text-align: center;
+    white-space: pre;
+}
+
+#spotifyArea iframe {
+    border: 2px solid;
+    border-color: #7f7b72 #dedad2 #dedad2 #7f7b72;
+    display: block;
+    width: 100%;
+}
+
+
+/* ============================================
+   MODE TABS
+   ============================================ */
+
+.tab-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    width: 100%;
+    border-bottom: 2px solid #aca899;
+    margin-bottom: -2px;
+    position: relative;
+    z-index: 1;
+    flex-wrap: wrap;
+}
+
+.tab {
+    font-family: Tahoma, Arial, sans-serif;
+    font-size: 11px;
+    color: #000;
+    background: linear-gradient(to bottom, #d8d5cc, #c4c0b8);
+    border: 2px solid #aca899;
+    border-bottom: none;
+    border-radius: 3px 3px 0 0;
+    padding: 4px 10px 5px;
+    cursor: pointer;
+}
+.tab:hover:not(.active) {
+    background: linear-gradient(to bottom, #e0ddd4, #ccc8c0);
+}
+.tab.active {
+    background: #ece9d8;
+    font-weight: bold;
+    border-bottom: 2px solid #ece9d8;
+    padding-bottom: 7px;
+    z-index: 2;
+}
+
+.tab-dur-hint {
+    margin-left: auto;
+    margin-right: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    color: #316ac5;
+    align-self: center;
+    padding: 2px 6px;
+    border: 1px solid #aca899;
+    background: white;
+    border-radius: 2px;
+}
+
+
+/* ============================================
+   TIMER WINDOW-IN-WINDOW
+   ============================================ */
+
+.timer-win {
+    border: 2px solid;
+    border-color: #7f7b72 #dedad2 #dedad2 #7f7b72;
+    background: white;
+    width: 100%;
+    max-width: 460px;
+    margin-top: 6px;
+    position: relative;
+    z-index: 1;
+}
+
+.timer-win-bar {
+    background: linear-gradient(to bottom, #4878d0 0%, #2458b8 100%);
+    padding: 4px 10px;
+    color: white;
+    font-weight: bold;
+    font-size: 10px;
+    letter-spacing: 2px;
+    font-family: 'Courier New', monospace;
+    text-shadow: 0 1px 1px rgba(0,0,0,.5);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.timer-win-bar-right {
+    font-size: 9px;
+    opacity: .8;
+    letter-spacing: 1px;
+    font-weight: normal;
+}
+
+.timer-win-body {
+    padding: clamp(10px, 2vh, 20px) clamp(12px, 2.5vw, 24px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(8px, 1.5vh, 14px);
+    background: #ece9d8;
+}
+
+
+/* ============================================
+   CLOCK RING
+   ============================================ */
+
+.clock-wrap {
+    position: relative;
+    width: clamp(160px, 22vw, 220px);
+    height: clamp(160px, 22vw, 220px);
+}
+
+.clock-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.svg-track {
+    fill: none;
+    stroke: #d4d0c8;
+    stroke-width: 14;
+}
+
+.svg-prog {
+    fill: none;
+    stroke: url(#ringGrad);
+    stroke-width: 14;
+    stroke-linecap: butt;
+    transition: stroke-dashoffset 1s linear;
+}
+
+.clock-face {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle at 38% 33%, #f4f1ea, #d8d5cc);
+    box-shadow:
+        inset 2px 2px 5px rgba(0,0,0,.2),
+        inset -1px -1px 3px rgba(255,255,255,.8);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    /* inset from the SVG track */
+    top: 18%;
+    left: 18%;
+    right: 18%;
+    bottom: 18%;
+}
+
+.clock-label {
+    font-family: 'Courier New', monospace;
+    font-size: 9px;
+    color: #888;
+    letter-spacing: 1px;
+    margin-bottom: 2px;
+}
+
+.clock-digits {
+    font-family: 'Courier New', monospace;
+    font-size: clamp(28px, 4.5vw, 44px);
+    font-weight: bold;
+    color: #0a246a;
+    letter-spacing: 2px;
+    user-select: none;
+    text-shadow: 1px 1px 0 rgba(255,255,255,.7), -1px -1px 0 rgba(0,0,0,.08);
+}
+
+.clock-sublabel {
+    font-family: 'Courier New', monospace;
+    font-size: 8px;
+    color: #aaa;
+    letter-spacing: 1px;
+    margin-top: 3px;
+}
+
+
+/* ============================================
+   PROGRESS BAR
+   ============================================ */
+
+.prog-wrap {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.prog-track {
+    flex: 1;
+    height: 16px;
+    background: white;
+    border: 2px solid;
+    border-color: #7f7b72 #dedad2 #dedad2 #7f7b72;
+    overflow: hidden;
+}
+
+.prog-fill {
+    height: 100%;
+    width: 0%;
+    background: repeating-linear-gradient(
+        90deg,
+        #316ac5 0px,
+        #316ac5 9px,
+        #5a8de0 9px,
+        #5a8de0 14px
+    );
+    transition: width 1s linear;
+    position: relative;
+}
+
+.prog-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -40px;
+    width: 40px;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent);
+    animation: shine 1.8s linear infinite;
+}
+
+@keyframes shine {
+    from { left: -40px; }
+    to   { left: 110%; }
+}
+
+.prog-pct {
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    color: #555;
+    min-width: 32px;
+    text-align: right;
+}
+
+
+/* ============================================
+   TIMER CONTROLS
+   ============================================ */
+
+.ctrl-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.hint-row {
+    font-size: 10px;
+    color: #777;
+    text-align: center;
+}
+
+kbd {
+    display: inline-block;
+    font-family: 'Courier New', monospace;
+    font-size: 9px;
+    color: #333;
+    background: linear-gradient(to bottom, #f4f1ea, #d4d0c8);
+    border: 1px solid #7f7b72;
+    border-bottom-color: #555;
+    border-right-color: #555;
+    padding: 1px 4px;
+    border-radius: 2px;
+}
+
+.ascii-deco {
+    font-family: 'Courier New', monospace;
+    font-size: 9px;
+    color: #999;
+    text-align: center;
+    line-height: 1.4;
+    white-space: pre;
+    pointer-events: none;
+}
+
+
+/* ============================================
+   INNER VIEWS (TOOLS / HELP)
+   ============================================ */
+
+.inner-view-wrap {
+    flex: 1;
+    padding: clamp(12px, 2vw, 24px) clamp(14px, 3vw, 32px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: #ece9d8;
+    height: 100%;
+}
+
+.inner-view-title {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.ascii-section-art {
+    font-family: 'Courier New', monospace;
+    font-size: clamp(7px, 1.1vw, 10px);
+    color: #316ac5;
+    line-height: 1.3;
+    white-space: pre;
+}
+
+.inner-view-sub {
+    font-size: 11px;
+    color: #555;
+    padding-left: 2px;
+}
+
+
+/* ============================================
+   TOOLS VIEW
+   ============================================ */
+
+.tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 10px;
+}
+
+.tools-group {
+    /* uses xp-group */
+}
+
+.tools-group-full {
+    grid-column: 1 / -1;
+}
+
+.tools-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tools-desc {
+    color: #555;
+    font-size: 11px;
+}
+
+.tools-input-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tools-num {
+    width: 70px;
+    flex-shrink: 0;
+    text-align: center;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+}
+
+.tools-unit {
+    font-size: 11px;
+    color: #555;
+}
+
+.preset-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+.preset-label {
+    font-size: 10px;
+    color: #777;
+    white-space: nowrap;
+}
+
+.preset-btn {
+    padding: 3px 8px;
+    font-size: 10px;
+    min-width: auto;
+}
+
+.tools-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.tools-status {
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    color: #316ac5;
+    min-height: 14px;
+}
+
+
+/* ============================================
+   HELP VIEW
+   ============================================ */
+
+.help-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 10px;
+}
+
+.help-group { }
+
+.help-group-full {
+    grid-column: 1 / -1;
+}
+
+.help-note {
+    font-family: 'Courier New', monospace;
+    font-size: 9px;
+    color: #888;
+    margin-bottom: 6px;
+}
+
+.link-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.link-list li {
+    padding: 2px 0;
+    border-bottom: 1px dotted #d4d0c8;
+}
+
+.xp-link {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: #0a246a;
+    text-decoration: none;
+    display: block;
+    padding: 2px 4px;
+}
+.xp-link:hover {
+    background: #316ac5;
+    color: white;
+    text-decoration: none;
+}
+
+.ascii-about {
+    font-family: 'Courier New', monospace;
+    font-size: clamp(7px, 1vw, 9px);
+    color: #444;
+    line-height: 1.5;
+    white-space: pre;
+}
+
+.help-back-row {
+    padding-top: 4px;
+}
+
+
+/* ============================================
+   SESSION COMPLETE DIALOG
+   ============================================ */
+
+.dialog-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,30,.4);
+    z-index: 99000;
+    align-items: center;
+    justify-content: center;
+}
+.dialog-overlay.open { display: flex; }
+
+.xp-dialog {
+    width: clamp(300px, 40vw, 380px);
+    background: #ece9d8;
+    border: 1px solid #003280;
+    border-radius: 8px 8px 3px 3px;
+    box-shadow: 0 0 0 1px #6090d8, 4px 6px 22px rgba(0,0,0,.6);
+    overflow: hidden;
+    animation: dlgPop .17s cubic-bezier(.2,.8,.3,1.3) both;
+}
+
+@keyframes dlgPop {
+    from { transform: scale(.75) translateY(20px); opacity: 0; }
+    to   { transform: scale(1) translateY(0);      opacity: 1; }
+}
+
+.dialog-body {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 18px 18px 12px;
+}
+
+.dialog-ascii {
+    font-family: 'Courier New', monospace;
+    font-size: 9px;
+    color: #316ac5;
+    line-height: 1.4;
+    white-space: pre;
+}
+
+.dialog-text strong {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 6px;
+}
+.dialog-text p { font-size: 11px; color: #333; line-height: 1.5; }
+.dialog-sub { margin-top: 4px; font-size: 10px; color: #777; }
+
+.dialog-footer {
+    background: linear-gradient(to bottom, #d8d5cc, #c8c5bc);
+    border-top: 1px solid #aca899;
+    padding: 8px 12px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+.dialog-ok { min-width: 75px; }
+
+
+/* ============================================
+   SCROLLBARS
+   ============================================ */
+
+::-webkit-scrollbar { width: 16px; }
+::-webkit-scrollbar-track { background: #d4d0c8; border-left: 1px solid #aca899; }
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(to right, #e4e0d8, #c4c0b8, #e4e0d8);
+    border: 1px solid #7f7b72;
+    min-height: 24px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to right, #d4d0c8, #b4b0a8, #d4d0c8);
+}
+::-webkit-scrollbar-button:single-button {
+    background: linear-gradient(to bottom, #e8e5dc, #c8c5bc);
+    border: 1px solid #7f7b72;
+    height: 16px;
+    display: block;
+}
+
+
+/* ============================================
+   MOBILE / TABLET RESPONSIVE
+   ============================================ */
+
+@media (max-width: 680px) {
+
+    .main-window {
+        top: 6px;
+        left: 6px;
+        right: 6px;
+        bottom: 36px;
+        width: auto;
+        transform: none;
+    }
+
+    .window-body {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        max-height: 38vh;
+        border-right: none;
+        border-bottom: 2px solid #aca899;
+    }
+
+    .vert-divider {
+        display: none;
+    }
+
+    .timer-area {
+        padding: 8px 10px;
+    }
+
+    .clock-wrap {
+        width: clamp(140px, 45vw, 180px);
+        height: clamp(140px, 45vw, 180px);
+    }
+
+    .clock-digits {
+        font-size: clamp(24px, 7vw, 36px);
+    }
+
+    .tab-row {
+        gap: 1px;
+    }
+
+    .tab {
+        padding: 3px 7px 4px;
+        font-size: 10px;
+    }
+
+    .timer-win-body {
+        padding: 10px 12px;
+        gap: 8px;
+    }
+
+    .ascii-deco {
+        font-size: 7px;
+    }
+
+    .ascii-section-art {
+        font-size: 6px;
+    }
+
+    .ascii-about {
+        font-size: 7px;
+    }
+
+    .taskbar { height: 26px; }
+    .start-btn { height: 22px; font-size: 11px; }
+}
+
+@media (max-width: 400px) {
+    .menu-bar { gap: 0; }
+    .menu-item { padding: 3px 5px; }
+    .ctrl-row { gap: 4px; }
+    .xp-btn { padding: 4px 8px; font-size: 10px; }
+}
